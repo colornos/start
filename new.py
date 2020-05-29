@@ -2,10 +2,10 @@ from gpiozero import LED, Button
 from signal import pause
 
 
-blue = LED(17)
+blue = LED(16)
 red = LED(27)
 green = LED(22)
-button = Button(2)
+button = Button(18)
 count = 0
 
 
