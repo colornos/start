@@ -21,20 +21,40 @@ while True:
     if count == 1:
         yellow.on()
         time.sleep(1)
+        with open('run.sh', 'r') as file:
+            data = file.readlines()
+        data[7] = "sudo python BS440.py" + '\n'
+        with open('run.sh', 'w') as file:
+            file.writelines(data)
         yellow.off()
     elif count == 2:
         white.on()
         time.sleep(1)
+        with open('run.sh', 'r') as file:
+            data = file.readlines()
+        data[7] = "sudo python MBP70.py" + '\n'
+        with open('run.sh', 'w') as file:
+            file.writelines(data)
         white.off()
     elif count == 3:
         white.off()
         red.on()
         time.sleep(1)
+        with open('run.sh', 'r') as file:
+            data = file.readlines()
+        data[7] = "sudo python BW300.py" + '\n'
+        with open('run.sh', 'w') as file:
+            file.writelines(data)
         red.off()
     elif count == 4:
         red.off()
         green.on()
         time.sleep(1)
+        with open('run.sh', 'r') as file:
+            data = file.readlines()
+        data[7] = "sudo python Contour7830.py" + '\n'
+        with open('run.sh', 'w') as file:
+            file.writelines(data)
         green.off()
     elif count == 5:
         count = 0
