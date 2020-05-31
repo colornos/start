@@ -1,62 +1,55 @@
-from gpiozero import LED, Button
-from signal import pause
-import time
+from gpiozero import RGBLED, Button
+from time import sleep
 
-blue = LED(16)
-red = LED(26)
-green = LED(5)
-white = LED(4)
-yellow = LED(17)
+led = RGBLED(red=26, green=5, blue=16)
 button = Button(18)
 count = 0
 
 while True:
     button.wait_for_press()
-    blue.on()
     
     button.wait_for_release()
-    blue.off()
     
     count = count + 1
     if count == 1:
-        yellow.on()
-        time.sleep(1)
+        led.color = (0,0,0.5)
         with open('run.sh', 'r') as file:
             data = file.readlines()
         data[7] = "sudo python BS440.py" + '\n'
         with open('run.sh', 'w') as file:
             file.writelines(data)
-        yellow.off()
+        sleep(1)
+        led.color = (0,0,0)
     elif count == 2:
-        white.on()
-        time.sleep(1)
+	led.color = (0,0.5,0)
         with open('run.sh', 'r') as file:
             data = file.readlines()
         data[7] = "sudo python MBP70.py" + '\n'
         with open('run.sh', 'w') as file:
             file.writelines(data)
-        white.off()
+        sleep(1)
+        led.color = (0,0,0)
     elif count == 3:
-        white.off()
-        red.on()
-        time.sleep(1)
+	led.color = (0.5,0,0)
         with open('run.sh', 'r') as file:
             data = file.readlines()
         data[7] = "sudo python BW300.py" + '\n'
         with open('run.sh', 'w') as file:
             file.writelines(data)
-        red.off()
+        sleep(1)
+        led.color = (0,0,0)
     elif count == 4:
-        red.off()
-        green.on()
-        time.sleep(1)
+	led.color = (0.5,0.5,0)
         with open('run.sh', 'r') as file:
             data = file.readlines()
         data[7] = "sudo python Contour7830.py" + '\n'
         with open('run.sh', 'w') as file:
             file.writelines(data)
-        green.off()
+        sleep(1)
+        led.color = (0,0,0)
     elif count == 5:
+        led.color = (0.5,0.5,0.5)
+        sleep(1)
+        led.color = (0,0,0)
         count = 0
-        green.off()
     print(count)
