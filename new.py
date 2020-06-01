@@ -1,55 +1,32 @@
-from gpiozero import RGBLED, Button
-from time import sleep
+# PWM1.py
+# LED dimming
 
-led = RGBLED(red=26, green=5, blue=16)
-button = Button(18)
-count = 0
+import RPi.GPIO as GPIO
+import time
 
+P_LED = 22 # adapt to your wiring
+fPWM = 50  # Hz (not higher with software PWM)
+
+def setup():
+    global pwm
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(P_LED, GPIO.OUT)
+    pwm = GPIO.PWM(P_LED, fPWM)
+    pwm.start(0)
+    
+print "starting"
+setup()
+duty = 0
+isIncreasing = True
 while True:
-    button.wait_for_press()
-    
-    button.wait_for_release()
-    
-    count = count + 1
-    if count == 1:
-        led.color = (0,0,0.5)
-        with open('run.sh', 'r') as file:
-            data = file.readlines()
-        data[7] = "sudo python BS440.py" + '\n'
-        with open('run.sh', 'w') as file:
-            file.writelines(data)
-        sleep(1)
-        led.color = (0,0,0)
-    elif count == 2:
-	led.color = (0,0.5,0)
-        with open('run.sh', 'r') as file:
-            data = file.readlines()
-        data[7] = "sudo python MBP70.py" + '\n'
-        with open('run.sh', 'w') as file:
-            file.writelines(data)
-        sleep(1)
-        led.color = (0,0,0)
-    elif count == 3:
-	led.color = (0.5,0,0)
-        with open('run.sh', 'r') as file:
-            data = file.readlines()
-        data[7] = "sudo python BW300.py" + '\n'
-        with open('run.sh', 'w') as file:
-            file.writelines(data)
-        sleep(1)
-        led.color = (0,0,0)
-    elif count == 4:
-	led.color = (0.5,0.5,0)
-        with open('run.sh', 'r') as file:
-            data = file.readlines()
-        data[7] = "sudo python Contour7830.py" + '\n'
-        with open('run.sh', 'w') as file:
-            file.writelines(data)
-        sleep(1)
-        led.color = (0,0,0)
-    elif count == 5:
-        led.color = (0.5,0.5,0.5)
-        sleep(1)
-        led.color = (0,0,0)
-        count = 0
-    print(count)
+    pwm.ChangeDutyCycle(duty)
+    print "D =", duty, "%"
+    if isIncreasing:
+        duty += 10
+    else:
+        duty -= 10
+    if duty == 100:
+        isIncreasing = False
+    if duty == 0:
+        isIncreasing = True
+    time.sleep(1)
