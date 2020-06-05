@@ -1,32 +1,12 @@
-# PWM1.py
-# LED dimming
-
 import RPi.GPIO as GPIO
-import time
+from time import sleep
 
-P_LED = 22 # adapt to your wiring
-fPWM = 50  # Hz (not higher with software PWM)
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(29, GPIO.OUT)
 
-def setup():
-    global pwm
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(P_LED, GPIO.OUT)
-    pwm = GPIO.PWM(P_LED, fPWM)
-    pwm.start(0)
-    
-print "starting"
-setup()
-duty = 0
-isIncreasing = True
-while True:
-    pwm.ChangeDutyCycle(duty)
-    print "D =", duty, "%"
-    if isIncreasing:
-        duty += 10
-    else:
-        duty -= 10
-    if duty == 100:
-        isIncreasing = False
-    if duty == 0:
-        isIncreasing = True
-    time.sleep(1)
+for count in range(0, 6):
+    GPIO.output(29, GPIO.HIGH)
+    sleep(0.1)
+    GPIO.output(29, GPIO.LOW)
+    sleep(0.1)
