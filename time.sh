@@ -1,11 +1,14 @@
-#!/bin/bash
+#! /bin/bash
 
-runtime="5 minute"
-endtime=$(date -ud "$runtime" +%s)
+RUNAT="07:54"
 
-while [[ $(date -u +%s) -le $endtime ]]
+while [ 1 ]
 do
-    echo "Time Now: `date +%H:%M:%S`"
-    echo "Sleeping for 1 minute"
-    sleep 1m
+    DATE=`/bin/date +%H:%M`
+    if [ $DATE. = $RUNAT. ]
+    then
+        echo "Hello world"
+    fi
+
+    sleep 60
 done
