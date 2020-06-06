@@ -1,11 +1,12 @@
 #!/bin/bash
 
-runtime="5 minute"
-endtime=$(date -ud "$runtime" +%s)
-
-while [[ $(date -u +%s) -le $endtime ]]
+while true;
 do
-    echo "Time Now: `date +%H:%M:%S`"
-    echo "Sleeping for 1 minute"
-    sleep 1m
+    DATE=`date | cut -d' ' -f4`
+    echo $DATE
+    if [[ $DATE == "11:33:00" ]]
+    then
+            echo "this is a test program"
+            sleep 1s
+    fi
 done
