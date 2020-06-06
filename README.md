@@ -1,4 +1,4 @@
-# test
+# Docker commands
 
 docker build -t "NAME:HERE" .
 
