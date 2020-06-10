@@ -1,0 +1,25 @@
+#!/bin/bash
+PID=`pidof matchbox-keyboard`
+if [ ! -e $PID ]; then
+  kill $PID
+else
+ matchbox-keyboard &
+fi
+---------------------------------
+[Desktop Entry]
+Name=Toggle Virtual Keyboard
+Comment=Toggle Virtual Keyboard
+Exec=/usr/bin/toggle-keyboard.sh
+Type=Application
+Icon=matchbox-keyboard.png
+Categories=Panel;Utility;MB
+X-MB-INPUT-MECHANISM=True
+----------------------------------
+Plugin {
+  type=launchbar
+  Config {
+    Button {
+      id=toggle-keyboard.desktop
+    }
+  }
+}
