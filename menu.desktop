@@ -1,9 +1,8 @@
 [Desktop Entry]
-Name=Little Crane
-Comment=The Little Crane That Could
-Icon=/home/pi/littlecrane/littlecrane.png
-Exec=/usr/local/bin/indiecity/InstalledApps/littlecrane/Full/startlittlecrane.sh
+Name=Menu
+Icon=/usr/share/menu/menu.jpg
+Exec=/usr/bin/python /home/pi/web-server/menu.py
 Type=Application
 Encoding=UTF-8
 Terminal=false
-Categories=None;
+Categories=Other;
