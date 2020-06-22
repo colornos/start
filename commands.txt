@@ -1,5 +1,5 @@
-wget https://www.kernel.org/pub/linux/bluetooth/bluez-5.XX.tar.xz
+wget https://www.kernel.org/pub/linux/bluetooth/bluez-5.52.tar.xz
 
-tar xvf bluez-5.XX.tar.xz
+tar xvf bluez-5.52.tar.xz
 **********************************************************************************************************
 apt-get install libusb-dev libdbus-1-dev libglib2.0-dev automake libudev-dev libical-dev libreadline-dev
