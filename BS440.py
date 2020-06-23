@@ -11,7 +11,9 @@ import os
 
 # Interesting characteristics
 Char_weight = '00008a21-0000-1000-8000-00805f9b34fb'  # weight data
+Char_body = '00008a22-0000-1000-8000-00805f9b34fb'  # body data
 Char_command = '00008a81-0000-1000-8000-00805f9b34fb'  # command register
+Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
 
 '''
 The decode functions Read Medisana BS440 Scale hex Indication and 
@@ -19,6 +21,35 @@ decodes scale values from hex data string.
 Each function receives the hex handle and bytevalues and
 return a dictionary with the decoded data
 '''
+
+def decodePerson(handle, values):
+    '''
+    decodePerson
+    handle: 0x25
+    values[0] = 0x84
+    Returns a dict for convenience:
+        valid (True, False)
+        person (1..9)
+        gender (male|female)
+        age (0..255 years)
+        size (0..255 cm)
+        activity (normal|high)
+    '''
+    data = unpack('BxBxBBBxB', bytes(values[0:9]))
+    retDict = {}
+    retDict["valid"] = (data[0] == 0x84)
+    retDict["person"] = data[1]
+    if data[2] == 1:
+        retDict["gender"] = "male"
+    else:
+        retDict["gender"] = "female"
+    retDict["age"] = data[3]
+    retDict["size"] = data[4]
+    if data[5] == 3:
+        retDict["activity"] = "high"
+    else:
+        retDict["activity"] = "normal"
+    return retDict
 
 def sanitize_timestamp(timestamp):
     retTS = time.time()
@@ -45,6 +76,34 @@ def decodeWeight(handle, values):
     retDict["person"] = data[3]
     return retDict
 
+def decodeBody(handle, values):
+    '''
+    decodeBody
+    Handle: 0x1e
+    Byte[0] = 0x6f
+    Returns:
+        valid (True, False)
+        timestamp (unix timestamp date and time of measurement)
+        person (1..9)
+        kcal = (0..65025 Kcal)
+        fat = (0..100,0 %)  percentage of body fat
+        tbw = (0..100,0 %) percentage of water
+        muscle = (0..100,0 %) percentage of muscle
+        bone = (0..100,0) bone weight
+        note: in python 2.7 to force results to be floats: devide by float.
+    '''
+    data = unpack('<BIBHHHHH', bytes(values[0:16]))
+    retDict = {}
+    retDict["valid"] = (data[0] == 0x6f)
+    retDict["timestamp"] = sanitize_timestamp(data[1])
+    retDict["person"] = data[2]
+    retDict["kcal"] = data[3]
+    retDict["fat"] = (0x0fff & data[4])/10.0
+    retDict["tbw"] = (0x0fff & data[5])/10.0
+    retDict["muscle"] = (0x0fff & data[6])/10.0
+    retDict["bone"] = (0x0fff & data[7])/10.0
+    return retDict
+
 def processIndication(handle, values):
     '''
     Indication handler:
@@ -53,13 +112,27 @@ def processIndication(handle, values):
     handle: byte
     value: bytearray
     '''
-    if handle == handle_weight:
+    if handle == handle_person:
+        result = decodePerson(handle, values)
+        if result not in persondata:
+            log.info(str(result))
+            persondata.append(result)
+        else:
+            log.info('Duplicate persondata record')
+    elif handle == handle_weight:
         result = decodeWeight(handle, values)
         if result not in weightdata:
             log.info(str(result))
             weightdata.append(result)
         else:
             log.info('Duplicate weightdata record')
+    elif handle == handle_body:
+        result = decodeBody(handle, values)
+        if result not in bodydata:
+            log.info(str(result))
+            bodydata.append(result)
+        else:
+            log.info('Duplicate bodydata record')
     else:
         log.debug('Unhandled Indication encountered')
 
@@ -170,8 +243,12 @@ while True:
     wait_for_device(device_name)
     device = connect_device(ble_address)
     if device:
+        persondata = []
         weightdata = []
+        bodydata = []
         
+        handle_body = device.get_handle(Char_body)
+        handle_person = device.get_handle(Char_person)
         handle_weight = device.get_handle(Char_weight)
         handle_command = device.get_handle(Char_command)
         continue_comms = True
@@ -182,6 +259,12 @@ while True:
         '''
         try:
             device.subscribe(Char_weight,
+                             callback=processIndication,
+                             indication=True)
+            device.subscribe(Char_body,
+                             callback=processIndication,
+                             indication=True)
+            device.subscribe(Char_person,
                              callback=processIndication,
                              indication=True)
         except pygatt.exceptions.NotConnectedError:
@@ -204,8 +287,8 @@ while True:
             except pygatt.exceptions.NotConnectedError:
                 continue_comms = False
             if continue_comms:
-                log.info('Waiting for notifications for another 3 seconds')
-                time.sleep(3)
+                log.info('Waiting for notifications for another 30 seconds')
+                time.sleep(30)
                 try:
                     device.disconnect()
                 except pygatt.exceptions.NotConnectedError:
@@ -213,12 +296,13 @@ while True:
 
                 log.info('Done receiving data from scale')
                 # process data if all received well
-                if weightdata:
+                if persondata and weightdata and bodydata:
                     # Sort scale output by timestamp to retrieve most recent three results
                     weightdatasorted = sorted(weightdata, key=lambda k: k['timestamp'], reverse=False)
+                    bodydatasorted = sorted(bodydata, key=lambda k: k['timestamp'], reverse=False)
                     
                     # Run all plugins found
                     for plugin in plugins.values():
-                        plugin.execute(config, weightdatasorted)
+                        plugin.execute(config, persondata, weightdatasorted, bodydatasorted)
                 else:
-                    log.error('Continue-conn...')
+                    log.error('Unreliable data received. Unable to process')
