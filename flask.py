@@ -11,3 +11,7 @@ setup(
     cmdclass = {'build_ext': build_ext},
     ext_modules = ext_modules
 )
+
+
+LINK:
+https://stackoverflow.com/questions/50932527/how-do-you-compile-a-flask-app-with-cython
