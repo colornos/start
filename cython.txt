@@ -5,3 +5,15 @@ distutils.core.setup(
     ****************************************
 python setup.py build_ext --inplace
 *********************************************
+this will create a .c & .so files 
+afterwards you can create another .py file and import the file
+EX:
+import blink
+
+save as blink.py
+then just call it like any python script 
+
+EX:
+sudo python blink.py
+
+you can delete the original .py and .c scripts and just leave the .so file
