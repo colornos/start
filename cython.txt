@@ -14,6 +14,6 @@ save as blink.py
 then just call it like any python script 
 
 EX:
-sudo python blink.py
+python blink.py
 
-you can delete the original .py and .c scripts and just leave the .so file
+you can delete the original .py, .pyx and .c scripts and just leave the .so file
